@@ -24,5 +24,8 @@ Analyzed 392K+ retail transactions using Python, SQL, MySQL and Power BI.
 - Products: 3,665
 - Countries: 37
 
+## Dashboard
+![RETAIL_ANALYTICS_DASHBOARD_IMAGE](RETAIL_ANALYTICS_DASHBOARD_IMAGE.png)
+
 ## Forecast
 Generated next 3 months revenue forecast using SARIMA model.
