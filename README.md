@@ -29,3 +29,4 @@ Analyzed 392K+ retail transactions using Python, SQL, MySQL and Power BI.
 
 ## Forecast
 Generated next 3 months revenue forecast using SARIMA model.
+![DEMAND_FORECAST_DASHBOARD_IMAGE](DEMAND_FORECAST_DASHBOARD.png)
