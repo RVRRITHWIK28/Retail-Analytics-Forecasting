@@ -94,3 +94,141 @@ def revenue_trend(country="All"):
         """
 
     return pd.read_sql(query, engine)
+
+def top_products(country="All"):
+
+    if country == "All":
+
+        sql_path = BASE_DIR / "sql" / "top_products.sql"
+
+        with open(sql_path, encoding="utf-8") as f:
+            query = f.read()
+
+    else:
+
+        query = f"""
+        SELECT
+            p.description,
+            ROUND(SUM(f.revenue),2) AS revenue
+        FROM fact_sales f
+        JOIN dim_product p
+            ON f.product_key = p.product_key
+        JOIN dim_country c
+            ON f.country_key = c.country_key
+        WHERE c.country = '{country}'
+        GROUP BY p.description
+        ORDER BY revenue DESC
+        LIMIT 10;
+        """
+
+    return pd.read_sql(query, engine)
+
+def country_sales(country="All"):
+
+    if country == "All":
+
+        sql_path = BASE_DIR / "sql" / "country_sales.sql"
+
+        with open(sql_path, encoding="utf-8") as f:
+            query = f.read()
+
+    else:
+
+        query = f"""
+        SELECT
+            c.country,
+            ROUND(SUM(f.revenue),2) AS revenue
+        FROM fact_sales f
+        JOIN dim_country c
+            ON f.country_key = c.country_key
+        WHERE c.country = '{country}'
+        GROUP BY c.country
+        ORDER BY revenue DESC;
+        """
+
+    return pd.read_sql(query, engine)
+
+def monthly_sales(country="All"):
+
+    if country == "All":
+
+        sql_path = BASE_DIR / "sql" / "monthly_sales.sql"
+
+        with open(sql_path, encoding="utf-8") as f:
+            query = f.read()
+
+    else:
+
+        query = f"""
+        SELECT
+            d.year,
+            d.month,
+            ROUND(SUM(f.revenue), 2) AS revenue
+        FROM fact_sales f
+        JOIN dim_date d
+            ON f.date_key = d.date_key
+        JOIN dim_country c
+            ON f.country_key = c.country_key
+        WHERE c.country = '{country}'
+        GROUP BY
+            d.year,
+            d.month
+        ORDER BY
+            d.year,
+            d.month;
+        """
+
+    return pd.read_sql(query, engine)
+
+def business_insights(country="All"):
+
+    if country == "All":
+
+        query = """
+        SELECT
+            ROUND(SUM(revenue),2) AS revenue,
+            ROUND(AVG(revenue),2) AS avg_order,
+            ROUND(MAX(revenue),2) AS max_sale
+        FROM fact_sales;
+        """
+
+    else:
+
+        query = f"""
+        SELECT
+            ROUND(SUM(f.revenue),2) AS revenue,
+            ROUND(AVG(f.revenue),2) AS avg_order,
+            ROUND(MAX(f.revenue),2) AS max_sale
+        FROM fact_sales f
+        JOIN dim_country c
+            ON f.country_key = c.country_key
+        WHERE c.country = '{country}';
+        """
+
+    return pd.read_sql(query, engine)
+
+def get_years():
+
+    query = """
+    SELECT DISTINCT year
+    FROM dim_date
+    ORDER BY year;
+    """
+
+    df = pd.read_sql(query, engine)
+
+    return df["year"].tolist()
+
+def world_revenue():
+
+    query = """
+    SELECT
+        c.country,
+        ROUND(SUM(f.revenue),2) AS revenue
+    FROM fact_sales f
+    JOIN dim_country c
+        ON f.country_key = c.country_key
+    GROUP BY c.country;
+    """
+
+    return pd.read_sql(query, engine)

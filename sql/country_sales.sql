@@ -9,6 +9,4 @@ ON f.country_key = c.country_key
 
 GROUP BY c.country
 
-ORDER BY revenue DESC
-
-LIMIT 10;
+ORDER BY revenue DESC;
