@@ -45,3 +45,25 @@ plt.legend()
 plt.title("Revenue Forecast")
 plt.grid(True)
 plt.show()
+
+# Create forecast dataframe
+forecast_df = pd.DataFrame({
+    'Month': forecast_index,
+    'Revenue': forecast.values,
+    'Type': 'Forecast'
+})
+
+# Historical dataframe
+historical_df = pd.DataFrame({
+    'Month': monthly_sales.index,
+    'Revenue': monthly_sales.values,
+    'Type': 'Historical'
+})
+
+# Combine both
+combined_df = pd.concat([historical_df, forecast_df])
+
+# Save CSV
+combined_df.to_csv("data/forecast_dashboard.csv", index=False)
+
+print("Forecast dashboard data saved successfully!")
