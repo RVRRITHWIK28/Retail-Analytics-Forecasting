@@ -20,7 +20,7 @@ def get_kpis(country="All"):
             COALESCE(SUM(revenue),0) AS revenue,
             COUNT(DISTINCT invoice_no) AS orders,
             COUNT(DISTINCT customer_key) AS customers
-        FROM fact_sales;
+        FROM public.fact_sales;
         """
 
     else:
@@ -30,8 +30,8 @@ def get_kpis(country="All"):
             COALESCE(SUM(f.revenue),0) AS revenue,
             COUNT(DISTINCT f.invoice_no) AS orders,
             COUNT(DISTINCT f.customer_key) AS customers
-        FROM fact_sales f
-        JOIN dim_country c
+        FROM public.fact_sales f
+        JOIN public.dim_country c
         ON f.country_key = c.country_key
         WHERE c.country = '{country}';
         """
@@ -39,7 +39,7 @@ def get_kpis(country="All"):
     df = pd.read_sql(query, engine)
 
     country_count = pd.read_sql(
-        "SELECT COUNT(*) AS countries FROM dim_country;",
+        "SELECT COUNT(*) AS countries FROM public.dim_country;",
         engine
     ).iloc[0]["countries"]
 
@@ -59,7 +59,7 @@ def get_countries():
 
     query = """
     SELECT country
-    FROM dim_country
+    FROM public.dim_country
     ORDER BY country;
     """
 
@@ -83,10 +83,10 @@ def revenue_trend(country="All"):
             d.year,
             d.month,
             SUM(f.revenue) AS revenue
-        FROM fact_sales f
-        JOIN dim_date d
+        FROM public.fact_sales f
+        JOIN public.dim_date d
             ON f.date_key = d.date_key
-        JOIN dim_country c
+        JOIN public.dim_country c
             ON f.country_key = c.country_key
         WHERE c.country = '{country}'
         GROUP BY d.year, d.month
@@ -110,10 +110,10 @@ def top_products(country="All"):
         SELECT
             p.description,
             ROUND(SUM(f.revenue),2) AS revenue
-        FROM fact_sales f
-        JOIN dim_product p
+        FROM public.fact_sales f
+        JOIN public.dim_product p
             ON f.product_key = p.product_key
-        JOIN dim_country c
+        JOIN public.dim_country c
             ON f.country_key = c.country_key
         WHERE c.country = '{country}'
         GROUP BY p.description
@@ -138,8 +138,8 @@ def country_sales(country="All"):
         SELECT
             c.country,
             ROUND(SUM(f.revenue),2) AS revenue
-        FROM fact_sales f
-        JOIN dim_country c
+        FROM public.fact_sales f
+        JOIN public.dim_country c
             ON f.country_key = c.country_key
         WHERE c.country = '{country}'
         GROUP BY c.country
@@ -164,10 +164,10 @@ def monthly_sales(country="All"):
             d.year,
             d.month,
             ROUND(SUM(f.revenue), 2) AS revenue
-        FROM fact_sales f
-        JOIN dim_date d
+        FROM public.fact_sales f
+        JOIN public.dim_date d
             ON f.date_key = d.date_key
-        JOIN dim_country c
+        JOIN public.dim_country c
             ON f.country_key = c.country_key
         WHERE c.country = '{country}'
         GROUP BY
@@ -189,7 +189,7 @@ def business_insights(country="All"):
             ROUND(SUM(revenue),2) AS revenue,
             ROUND(AVG(revenue),2) AS avg_order,
             ROUND(MAX(revenue),2) AS max_sale
-        FROM fact_sales;
+        FROM public.fact_sales;
         """
 
     else:
@@ -199,8 +199,8 @@ def business_insights(country="All"):
             ROUND(SUM(f.revenue),2) AS revenue,
             ROUND(AVG(f.revenue),2) AS avg_order,
             ROUND(MAX(f.revenue),2) AS max_sale
-        FROM fact_sales f
-        JOIN dim_country c
+        FROM public.fact_sales f
+        JOIN public.dim_country c
             ON f.country_key = c.country_key
         WHERE c.country = '{country}';
         """
@@ -211,7 +211,7 @@ def get_years():
 
     query = """
     SELECT DISTINCT year
-    FROM dim_date
+    FROM public.dim_date
     ORDER BY year;
     """
 
@@ -225,8 +225,8 @@ def world_revenue():
     SELECT
         c.country,
         ROUND(SUM(f.revenue),2) AS revenue
-    FROM fact_sales f
-    JOIN dim_country c
+    FROM public.fact_sales f
+    JOIN public.dim_country c
         ON f.country_key = c.country_key
     GROUP BY c.country;
     """
