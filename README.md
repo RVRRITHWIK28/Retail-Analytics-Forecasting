@@ -1,5 +1,12 @@
 # Retail Analytics & Revenue Forecasting
 
+## 🚀 Live Demo
+
+🌐 **Streamlit App:**  
+https://rvrrithwik28retailanalyticsforecasting.streamlit.app/
+
+---
+
 ## 📌 Project Overview
 
 Analyzed 392K+ retail transactions using Python, SQL, MySQL and Power BI.
@@ -17,14 +24,6 @@ This project transforms raw retail transaction data into an interactive analytic
 
 The project combines **data engineering, SQL analytics, visualization, and time-series forecasting** into a single platform.
 
----
-
-## 🚀 Live Demo
-
-🌐 **Streamlit App:**  
-https://rvrrithwik28retailanalyticsforecasting.streamlit.app/
-
----
 
 ## ✨ Key Features
 
