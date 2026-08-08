@@ -82,26 +82,6 @@ The project combines **data engineering, SQL analytics, visualization, and time-
 
 ---
 
-## 🏗️ Data Architecture
-
-The project follows a **Star Schema** design.
-
-```text
-                    ┌───────────────┐
-                    │   dim_date    │
-                    └───────┬───────┘
-                            │
-                            │
-┌───────────────┐     ┌─────▼─────┐     ┌───────────────┐
-│ dim_customer  │────▶│ fact_sales │◀────│ dim_product   │
-└───────────────┘     └─────┬─────┘     └───────────────┘
-                            │
-                            │
-                    ┌───────▼───────┐
-                    │  dim_country  │
-                    └───────────────┘
-
-
 ## Tech Stack
 - Python
 - Pandas
@@ -128,3 +108,25 @@ Generated next 3 months revenue forecast using SARIMA model.
 
 
 ![DEMAND_FORECAST_DASHBOARD_IMAGE](screenshots/DEMAND_FORECAST_DASHBOARD.png)
+
+## 🏗️ Data Architecture
+
+The project follows a **Star Schema** design.
+
+```text
+                    ┌───────────────┐
+                    │   dim_date    │
+                    └───────┬───────┘
+                            │
+                            │
+┌───────────────┐     ┌─────▼─────┐     ┌───────────────┐
+│ dim_customer  │────▶│ fact_sales │◀────│ dim_product   │
+└───────────────┘     └─────┬─────┘     └───────────────┘
+                            │
+                            │
+                    ┌───────▼───────┐
+                    │  dim_country  │
+                    └───────────────┘
+
+
+
