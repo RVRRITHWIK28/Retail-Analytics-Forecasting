@@ -1,6 +1,6 @@
 # Retail Analytics & Revenue Forecasting
 
-## 🚀 Live Demo
+# 🚀 Live Demo
 
 🌐 **Streamlit App:**  
 https://rvrrithwik28retailanalyticsforecasting.streamlit.app/
