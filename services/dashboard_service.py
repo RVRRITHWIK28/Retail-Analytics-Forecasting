@@ -82,15 +82,16 @@ def revenue_trend(country="All"):
         SELECT
             d.year,
             d.month,
-            SUM(f.revenue) AS revenue
+            ROUND(SUM(f.revenue), 2) AS revenue
         FROM public.fact_sales f
         JOIN public.dim_date d
             ON f.date_key = d.date_key
-        JOIN public.dim_country c
-            ON f.country_key = c.country_key
-        WHERE c.country = '{country}'
-        GROUP BY d.year, d.month
-        ORDER BY d.year, d.month;
+        GROUP BY
+            d.year,
+            d.month
+        ORDER BY
+            d.year,
+            d.month;
         """
 
     return pd.read_sql(query, engine)
@@ -161,21 +162,18 @@ def monthly_sales(country="All"):
 
         query = f"""
         SELECT
-            d.year,
-            d.month,
-            ROUND(SUM(f.revenue), 2) AS revenue
-        FROM public.fact_sales f
-        JOIN public.dim_date d
-            ON f.date_key = d.date_key
-        JOIN public.dim_country c
-            ON f.country_key = c.country_key
-        WHERE c.country = '{country}'
-        GROUP BY
-            d.year,
-            d.month
-        ORDER BY
-            d.year,
-            d.month;
+    d.year,
+    d.month,
+    ROUND(SUM(f.revenue), 2) AS revenue
+FROM public.fact_sales f
+JOIN public.dim_date d
+    ON f.date_key = d.date_key
+GROUP BY
+    d.year,
+    d.month
+ORDER BY
+    d.year,
+    d.month;
         """
 
     return pd.read_sql(query, engine)

@@ -61,6 +61,32 @@ Production-Level Business Intelligence Dashboard
 st.markdown("""
 <style>
 
+/* Make all sidebar elements show hand cursor */
+section[data-testid="stSidebar"] * {
+    cursor: pointer !important;
+}
+
+/* Selectbox */
+div[data-baseweb="select"] {
+    cursor: pointer !important;
+}
+
+/* Dropdown list items */
+li {
+    cursor: pointer !important;
+}
+
+/* Navigation links */
+section[data-testid="stSidebarNav"] a {
+    cursor: pointer !important;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<style>
+
 /* Selectbox */
 div[data-baseweb="select"]{
     border-radius:10px;
@@ -78,7 +104,63 @@ div[data-baseweb="select"] *{
 }
 
 </style>
+
+
 """, unsafe_allow_html=True)
+
+st.markdown("""
+<style>
+
+/* Compact Sidebar */
+section[data-testid="stSidebar"] {
+    width: 230px !important;
+    min-width: 230px !important;
+}
+
+/* Reduce sidebar top padding */
+section[data-testid="stSidebar"] > div {
+    padding-top: 1rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+/* Sidebar text */
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] label {
+    font-size: 13px !important;
+}
+
+/* Sidebar headings */
+section[data-testid="stSidebar"] h1 {
+    font-size: 20px !important;
+    margin-bottom: 8px !important;
+}
+
+/* Reduce selectbox height */
+section[data-testid="stSidebar"] div[data-baseweb="select"] {
+    min-height: 36px !important;
+    font-size: 13px !important;
+}
+
+/* Reduce spacing between elements */
+section[data-testid="stSidebar"] .stElementContainer {
+    margin-bottom: 4px !important;
+}
+
+/* Navigation links */
+section[data-testid="stSidebarNav"] a {
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+}
+
+/* Hand cursor */
+section[data-testid="stSidebar"] * {
+    cursor: pointer !important;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+
 
 col1, col2, col3 = st.columns([4,2,1])
 
@@ -94,7 +176,6 @@ st.divider()
 
 st.sidebar.markdown("""
 # 🌍 FILTER PANEL
----
 """)
 
 countries = get_countries()
@@ -108,8 +189,6 @@ selected_country = st.sidebar.selectbox(
 with st.spinner("Loading Dashboard..."):
 
     revenue, orders, customers, country_count = get_kpis(selected_country)
-
-st.sidebar.markdown("---")
 
 st.sidebar.markdown("### 📊 Quick Statistics")
 
@@ -128,25 +207,21 @@ st.sidebar.metric(
     f"{customers:,}"
 )
 
-st.sidebar.markdown("---")
-
-st.sidebar.markdown("### 📥 Export Data")
+st.sidebar.markdown("### 📥 Export Monthly Sales Data CSV")
 
 monthly_df = monthly_sales(selected_country)
 
 csv = monthly_df.to_csv(index=False).encode("utf-8")
 
 st.sidebar.download_button(
-    label="⬇️ Download CSV",
+    label="⬇️ Download",
     data=csv,
     file_name="monthly_sales.csv",
     mime="text/csv",
     use_container_width=True
 )
 
-st.sidebar.markdown("---")
-
-st.sidebar.markdown("### ℹ️ Dashboard Information")
+st.sidebar.markdown("### ℹ️ Dashboard Info")
 
 st.sidebar.success("🟢 PostgreSQL Connected")
 
@@ -512,23 +587,6 @@ st.markdown(f"""
 
 st.divider()
 
-st.markdown("""
-<div style="
-    text-align:center;
-    color:#9CA3AF;
-    font-size:15px;
-    padding:15px;
-">
-
-🚀 Built with <b>Python</b> • <b>Streamlit</b> • <b>PostgreSQL</b> • <b>Plotly</b>
-
-© 2026 Retail Analytics & Demand Forecasting Platform
-
-</div>
-""", unsafe_allow_html=True)
-
-st.divider()
-
 st.markdown("## 🌍 Global Revenue Distribution")
 
 world_df = world_revenue()
@@ -551,3 +609,20 @@ fig.update_layout(
 )
 
 st.plotly_chart(fig, use_container_width=True)
+
+st.divider()
+
+st.markdown("""
+<div style="
+    text-align:center;
+    color:#9CA3AF;
+    font-size:15px;
+    padding:15px;
+">
+
+🚀 Built with <b>Python</b> • <b>Streamlit</b> • <b>PostgreSQL</b> • <b>Plotly</b>
+
+© 2026 Retail Analytics & Demand Forecasting Platform
+
+</div>
+""", unsafe_allow_html=True)
