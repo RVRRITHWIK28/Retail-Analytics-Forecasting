@@ -100,7 +100,6 @@ The project combines **data engineering, SQL analytics, visualization, and time-
 The project also includes an interactive Power BI dashboard designed for
 business-level reporting and decision-making.
 
-## Dashboard
 ![RETAIL_ANALYTICS_DASHBOARD_IMAGE](screenshots/RETAIL_ANALYTICS_DASHBOARD_IMAGE.png)
 
 ## Forecast
