@@ -121,10 +121,10 @@ The project also includes an interactive Power BI dashboard designed for
 business-level reporting and decision-making.
 
 ## Dashboard
-![RETAIL_ANALYTICS_DASHBOARD_IMAGE](RETAIL_ANALYTICS_DASHBOARD_IMAGE.png)
+![RETAIL_ANALYTICS_DASHBOARD_IMAGE](screenshots/RETAIL_ANALYTICS_DASHBOARD_IMAGE.png)
 
 ## Forecast
 Generated next 3 months revenue forecast using SARIMA model.
 
 
-![DEMAND_FORECAST_DASHBOARD_IMAGE](DEMAND_FORECAST_DASHBOARD.png)
+![DEMAND_FORECAST_DASHBOARD_IMAGE](screenshots/DEMAND_FORECAST_DASHBOARD.png)
