@@ -1,6 +1,6 @@
-
+import os
 from sqlalchemy import create_engine
 
-DATABASE_URL = "postgresql://postgres:9440211075%40Rv@localhost:5432/retail_db"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_engine(DATABASE_URL)
