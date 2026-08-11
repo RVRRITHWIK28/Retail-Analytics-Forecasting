@@ -26,7 +26,6 @@ def forecast_sales_with_ci(df: pd.DataFrame, steps: int = 3) -> pd.DataFrame:
             model = ARIMA(series, order=(1, 1, 1))
             model_fit = model.fit()
 
-            # Predict next steps with confidence intervals
             forecast_res = model_fit.get_forecast(steps=steps)
             forecast_vals = forecast_res.predicted_mean
 
@@ -53,10 +52,7 @@ def forecast_sales_with_ci(df: pd.DataFrame, steps: int = 3) -> pd.DataFrame:
 
 def _fallback_forecast(df: pd.DataFrame, steps: int) -> pd.DataFrame:
     start_date = pd.Timestamp.now()
-    if not df.empty and "revenue" in df.columns and len(df) > 0:
-        base_val = max(0.0, float(df["revenue"].iloc[-1]))
-    else:
-        base_val = 0.0
+    base_val = max(0.0, float(df["revenue"].iloc[-1])) if not df.empty and "revenue" in df.columns and len(df) > 0 else 0.0
 
     future_dates = pd.date_range(start=start_date, periods=steps, freq="MS")
     forecast_df = pd.DataFrame({
@@ -68,3 +64,7 @@ def _fallback_forecast(df: pd.DataFrame, steps: int) -> pd.DataFrame:
     }, index=future_dates)
     forecast_df.index = forecast_df.index.strftime("%b %Y")
     return forecast_df
+
+
+# Backward compatibility alias
+forecast_sales = forecast_sales_with_ci
