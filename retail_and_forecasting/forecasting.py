@@ -4,9 +4,6 @@ from statsmodels.tsa.arima.model import ARIMA
 import warnings
 
 def forecast_sales_with_ci(df: pd.DataFrame, steps: int = 3) -> pd.DataFrame:
-    """
-    Generates revenue forecast for next `steps` months with 80% and 95% confidence intervals.
-    """
     if df.empty or "revenue" not in df.columns or len(df) < 4:
         return _fallback_forecast(df, steps)
 
@@ -65,6 +62,5 @@ def _fallback_forecast(df: pd.DataFrame, steps: int) -> pd.DataFrame:
     forecast_df.index = forecast_df.index.strftime("%b %Y")
     return forecast_df
 
-
-# Backward compatibility alias
+# Alias so both function names work
 forecast_sales = forecast_sales_with_ci
