@@ -1,4 +1,4 @@
-# Retail Analytics & Revenue Forecasting
+### Retail Analytics & Revenue Forecasting
 
 ## 🚀 Live Demo
 
