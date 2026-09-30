@@ -10,16 +10,17 @@ import streamlit as st
 import plotly.express as px
 import pandas as pd
 
-from retail_and_forecasting.forecasting import forecast_sales_with_ci
-from services.dashboard_service import (
-    get_kpis,
+from services.snowflake_dashboard_service import (
     get_countries,
+    get_kpis,
+    get_model_comparison,
+    get_future_forecasts,
     revenue_trend,
     top_products,
     country_sales,
     monthly_sales,
     business_insights,
-    world_revenue,
+    world_revenue
 )
 
 # --------------------------
@@ -54,7 +55,20 @@ section[data-testid="stSidebar"] * { cursor: pointer !important; }
 
 col1, col2, col3 = st.columns([4, 2, 1])
 with col3:
-    st.caption("🕒 " + datetime.now().strftime("%d-%b-%Y %I:%M %p"))
+    st.markdown(
+        f"""
+        <div style="
+            text-align:right;
+            color:#888;
+            font-size:11px;
+            line-height:1.2;
+            margin-top:8px;
+        ">
+            🕒 {datetime.now().strftime("%d-%b-%Y %I:%M %p")}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 st.divider()
 
@@ -92,10 +106,13 @@ st.sidebar.download_button(
 )
 
 st.sidebar.markdown("### ℹ️ Dashboard Info")
-st.sidebar.success("🟢 PostgreSQL Connected")
-st.sidebar.write("**Version:** 1.0")
+st.sidebar.success("🟢 Snowflake Connected")
+st.sidebar.write("**Version:** 2.0")
 st.sidebar.write("**Status:** Production")
-st.sidebar.caption("Retail Analytics Platform")
+st.sidebar.caption(
+    "PySpark → Snowflake → SARIMA + LSTM"
+)
+
 
 # --------------------------------------------------
 # KPI CARDS
@@ -181,102 +198,236 @@ with right:
 st.divider()
 
 # -----------------------------------
-# Monthly Sales & Forecast
+# Monthly Sales
 # -----------------------------------
-left, right = st.columns(2)
 
-with left:
-    st.subheader("📅 Monthly Sales")
-    monthly_df["Date"] = pd.to_datetime(monthly_df["year"].astype(str) + "-" + monthly_df["month"].astype(str) + "-01")
-    monthly_df = monthly_df.sort_values("Date")
-    monthly_df["Period"] = monthly_df["Date"].dt.strftime("%b %Y")
 
-    fig_monthly = px.bar(
-        monthly_df,
-        x="Period",
-        y="revenue",
-        color_discrete_sequence=["#9333EA"],
-        title="Monthly Revenue"
-    )
-    fig_monthly.update_layout(template="plotly_white", height=450)
-    fig_monthly.update_traces(hovertemplate="<b>%{x}</b><br>Revenue: ₹%{y:,.2f}<extra></extra>")
-    st.plotly_chart(fig_monthly, use_container_width=True)
+st.subheader("📅 Monthly Sales")
 
-with right:
+monthly_df["Date"] = pd.to_datetime(
+    monthly_df["year"].astype(str)
+    + "-"
+    + monthly_df["month"].astype(str)
+    + "-01"
+)
+
+monthly_df = monthly_df.sort_values("Date")
+
+monthly_df["Period"] = monthly_df["Date"].dt.strftime("%b %Y")
+
+fig_monthly = px.bar(
+    monthly_df,
+    x="Period",
+    y="revenue",
+    color_discrete_sequence=["#9333EA"],
+    title="Monthly Revenue"
+)
+
+fig_monthly.update_layout(
+    template="plotly_white",
+    height=450
+)
+
+fig_monthly.update_traces(
+    hovertemplate="<b>%{x}</b><br>Revenue: ₹%{y:,.2f}<extra></extra>"
+)
+
+st.plotly_chart(
+    fig_monthly,
+    use_container_width=True
+)
+
+
+# ===================================
+# Demand Forecast
+# ===================================
+
+st.divider()
+
+st.subheader("🔮 Demand Forecast & What-If Scenario Simulator")
+
+growth_factor = st.slider(
+    "⚡ What-If Scenario: Simulated Growth/Decrease (%)",
+    min_value=-50,
+    max_value=100,
+    value=0,
+    step=5,
+    help="Adjust forecast baseline dynamically based on market assumptions."
+)
+
+# -----------------------------------
+# Load Forecasts from Snowflake
+# -----------------------------------
+
+forecast_df = get_future_forecasts()
+
+if forecast_df.empty:
+
+    st.warning("No forecast data available.")
+
+else:
+
     # -----------------------------------
-    # Demand Forecast & What-If Simulator
+    # Prepare Historical Data
     # -----------------------------------
-    st.subheader("🔮 Demand Forecast & What-If Scenario Simulator")
 
-    # What-If Growth Slider
-    growth_factor = st.slider(
-        "⚡ What-If Scenario: Simulated Growth/Decrease (%)",
-        min_value=-50,
-        max_value=100,
-        value=0,
-        step=5,
-        help="Adjust forecast baseline dynamically based on market assumptions."
+    historical_df = monthly_df.copy()
+
+    historical_df["Period"] = pd.to_datetime(
+        historical_df["year"].astype(str)
+        + "-"
+        + historical_df["month"].astype(str)
+        + "-01"
     )
 
-    forecast_df = forecast_sales_with_ci(monthly_df)
+    # -----------------------------------
+    # Prepare Forecast Data
+    # -----------------------------------
 
-    # Apply Growth Multiplier
+    forecast_df["FORECAST_DATE"] = pd.to_datetime(
+        forecast_df["FORECAST_DATE"]
+    )
+
+    forecast_df = forecast_df.rename(
+        columns={
+            "FORECAST_DATE": "Period",
+            "MODEL_NAME": "Model",
+            "FORECAST_REVENUE": "Forecast"
+        }
+    )
+    # -----------------------------------
+    # What-If Scenario
+    # -----------------------------------
+
     multiplier = 1 + (growth_factor / 100.0)
-    forecast_df["Simulated_Forecast"] = forecast_df["Forecast"] * multiplier
+
+    forecast_df["Simulated_Forecast"] = (
+        forecast_df["Forecast"] * multiplier
+    )
+
+    # -----------------------------------
+    # Forecast Chart
+    # -----------------------------------
 
     import plotly.graph_objects as go
 
     fig_fc = go.Figure()
 
-    # Historical Line
-    fig_fc.add_trace(go.Scatter(
-        x=monthly_df["Period"],
-        y=monthly_df["revenue"],
-        mode="lines+markers",
-        name="Historical Revenue",
-        line=dict(color="#2563EB", width=2)
-    ))
-
-    # 95% Confidence Band
-    fig_fc.add_trace(go.Scatter(
-        x=list(forecast_df.index) + list(forecast_df.index)[::-1],
-        y=list(forecast_df["Upper_95"]) + list(forecast_df["Lower_95"])[::-1],
-        fill="toself",
-        fillcolor="rgba(220, 38, 38, 0.15)",
-        line=dict(color="rgba(255,255,255,0)"),
-        hoverinfo="skip",
-        showlegend=True,
-        name="95% Confidence Interval"
-    ))
-
-    # Baseline Forecast Line
-    fig_fc.add_trace(go.Scatter(
-        x=forecast_df.index,
-        y=forecast_df["Forecast"],
-        mode="lines+markers",
-        name="Baseline Forecast",
-        line=dict(color="#DC2626", dash="dash")
-    ))
-
-    # What-If Simulated Line
-    if growth_factor != 0:
-        fig_fc.add_trace(go.Scatter(
-            x=forecast_df.index,
-            y=forecast_df["Simulated_Forecast"],
+    # Historical Revenue
+    fig_fc.add_trace(
+        go.Scatter(
+            x=historical_df["Period"],
+            y=historical_df["revenue"],
             mode="lines+markers",
-            name=f"Simulated ({growth_factor:+d}%)",
-            line=dict(color="#16A34A", width=3)
-        ))
-
-    fig_fc.update_layout(
-        template="plotly_white",
-        height=480,
-        xaxis_title="Period",
-        yaxis_title="Revenue (₹)",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            name="Historical Revenue"
+        )
     )
 
-    st.plotly_chart(fig_fc, use_container_width=True)
+    # Model Forecasts
+    for model in forecast_df["Model"].unique():
+
+        model_df = forecast_df[
+            forecast_df["Model"] == model
+        ]
+
+        fig_fc.add_trace(
+            go.Scatter(
+                x=model_df["Period"],
+                y=model_df["Forecast"],
+                mode="lines+markers",
+                name=f"{model} Forecast"
+            )
+        )
+
+        # What-If
+        if growth_factor != 0:
+
+            fig_fc.add_trace(
+                go.Scatter(
+                    x=model_df["Period"],
+                    y=model_df["Simulated_Forecast"],
+                    mode="lines+markers",
+                    name=f"{model} Simulated ({growth_factor:+d}%)",
+                    line=dict(dash="dot")
+                )
+            )
+
+    fig_fc.update_layout(
+        template="plotly_dark",
+        height=500,
+        title=dict(
+            text="Historical Revenue vs Model Forecast",
+            x=0
+        ),
+        xaxis=dict(
+            title="Date"
+        ),
+        yaxis=dict(
+            title="Revenue (₹)"
+        ),
+        hovermode="x unified",
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
+        margin=dict(
+            l=40,
+            r=30,
+            t=70,
+            b=40
+        )
+    )
+
+    st.plotly_chart(
+        fig_fc,
+        use_container_width=True
+    )
+
+    # -----------------------------------
+    # Forecast Details
+    # -----------------------------------
+
+    st.markdown("### 📊 Forecast Details")
+
+    display_forecast = forecast_df.copy()
+
+    display_forecast["Forecast"] = (
+        display_forecast["Forecast"].round(2)
+    )
+
+    display_forecast["Simulated_Forecast"] = (
+        display_forecast["Simulated_Forecast"].round(2)
+    )
+
+    display_forecast["Period"] = (
+        pd.to_datetime(display_forecast["Period"])
+        .dt.strftime("%b %Y")
+    )
+
+    display_forecast = display_forecast.rename(
+        columns={
+            "Forecast": "Forecast Revenue",
+            "Simulated_Forecast": "What-If Revenue"
+        }
+    )
+
+    display_forecast = display_forecast[
+        [
+            "Period",
+            "Model",
+            "Forecast Revenue",
+            "What-If Revenue"
+        ]
+    ]
+
+    st.dataframe(
+        display_forecast,
+        use_container_width=True,
+        hide_index=True
+    )
 
 st.divider()
 
@@ -347,7 +498,7 @@ st.divider()
 
 st.markdown("""
 <div style="text-align:center; color:#9CA3AF; font-size:15px; padding:15px;">
-🚀 Built with <b>Python</b> • <b>Streamlit</b> • <b>PostgreSQL</b> • <b>Plotly</b><br>
-© 2026 Retail Analytics & Demand Forecasting Platform
+🚀 Built with <b>Python</b> • <b>PySpark</b> • <b>Snowflake</b> • <b>Streamlit</b> • <b>Plotly</b><br>
+© 2026 Retail Analytics & Revenue Forecasting Platform 2.0
 </div>
 """, unsafe_allow_html=True)
