@@ -1,11 +1,11 @@
-### Retail Analytics & Revenue Forecasting
+# 🛒 Retail Intelligence & Revenue Forecasting Platform
 
-## 🚀 Live Demo
+> An end-to-end analytics platform for uncovering retail trends, monitoring business performance, and forecasting future revenue.
 
-🌐 **Streamlit App:**  
-https://rvrrithwik28retailanalyticsforecasting.streamlit.app/
+### 🌐 Live Demo
 
----
+**Try the platform:** [Retail Analytics Dashboard](https://rvrrithwik28retailanalyticsforecasting.streamlit.app/?utm_source=chatgpt.com)
+
 
 ## 📌 Project Overview
 
