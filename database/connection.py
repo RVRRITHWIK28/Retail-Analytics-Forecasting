@@ -22,6 +22,28 @@ def get_database_url() -> str:
 # Initialize connection engine
 DATABASE_URL = get_database_url()
 
+# Force SQLAlchemy to use the installed psycopg2 driver
+if DATABASE_URL.startswith("postgresql+psycopg://"):
+    DATABASE_URL = DATABASE_URL.replace(
+        "postgresql+psycopg://",
+        "postgresql+psycopg2://",
+        1
+    )
+
+elif DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace(
+        "postgres://",
+        "postgresql+psycopg2://",
+        1
+    )
+
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace(
+        "postgresql://",
+        "postgresql+psycopg2://",
+        1
+    )
+
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,  # Checks connection health before executing queries
